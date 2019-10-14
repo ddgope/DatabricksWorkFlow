@@ -9,7 +9,11 @@
 
 # COMMAND ----------
 
-help(dbutils.fs)
+display(dbutils.fs())
+
+# COMMAND ----------
+
+dbutils.fs.help("mkdirs")
 
 # COMMAND ----------
 
@@ -29,11 +33,15 @@ display(dbutils.fs.ls("/newdir"))
 
 # COMMAND ----------
 
-dbutils.fs.put("/newdir/new.txt","Demo text")
+dbutils.fs.help("put")
 
 # COMMAND ----------
 
-dbutils.fs.ls("/newdir")
+dbutils.fs.put("/newdir/new.txt","This is demo text file!!")
+
+# COMMAND ----------
+
+display(dbutils.fs.ls("/newdir"))
 
 # COMMAND ----------
 
@@ -45,15 +53,11 @@ dbutils.fs.mv("/newdir/new.txt","/newDir/new")
 
 # COMMAND ----------
 
-display(dbutils.fs.ls("/newdir/new/"))
+display(dbutils.fs.ls("/newDir/new/"))
 
 # COMMAND ----------
 
-dbutils.fs.cp("/newDir/new/new.txt","/newdir")
-
-# COMMAND ----------
-
-dbutils.fs.rm("/newDir/new.txt")
+dbutils.fs.rm("/newDir/new/new.txt")
 
 # COMMAND ----------
 
@@ -79,7 +83,15 @@ dbutils.widgets.help()
 
 # COMMAND ----------
 
-dbutils.notebook.run("Workflow",timeout_seconds=5)
+display(dbutils.notebook)
+
+# COMMAND ----------
+
+dbutils.notebook.help("run")
+
+# COMMAND ----------
+
+dbutils.notebook.run("/Shared/workflowtest",timeout_seconds=300)
 
 # COMMAND ----------
 
@@ -98,6 +110,10 @@ dbutils.library.installPyPI("sympy")
 
 # MAGIC %md
 # MAGIC ### Secrets
+
+# COMMAND ----------
+
+display(dbutils.secrets)
 
 # COMMAND ----------
 
