@@ -32,11 +32,11 @@ def writeToSQLDB():
 
 # DBTITLE 1,Load Date Dimension
 import pandas as pd
-def create_date_table(start='2000-01-01', end='2037-12-31'):
+def create_date_table(start='2019-01-01', end='2020-12-31'):
    df = pd.DataFrame({"date": pd.date_range(start, end)})
    df["week_day"] = df.date.dt.weekday_name
    df["day"] = df.date.dt.day
-   df["month"] = df.date.dt.day
+   df["month"] = df.date.dt.month
    df["week"] = df.date.dt.weekofyear
    df["quarter"] = df.date.dt.quarter
    df["year"] = df.date.dt.year
@@ -48,32 +48,40 @@ dateDim.head(5)
 
 # COMMAND ----------
 
-# DBTITLE 1,Load Company Dimension
-import pandas as pd  
-    
-# List1  
-Name = ['Apple', 'Microsoft', 'Google', 'Facebook']  
-    
-# List2  
-Id = [1, 2, 3, 4]  
+dateDimFinal= spark.createDataFrame(dateDim)
 
-#List 3
-Ticker=['AAPL','MSFT','GOOGL','FB']
-    
-# get the list of tuples from two lists.  
-# and merge them by using zip().  
-list_of_tuples = list(zip(Id, Name, Ticker))  
-    
-# Assign data to tuples.  
-list_of_tuples
-  
-  
-# Converting lists of tuples into  
-# pandas Dataframe.  
-df = pd.DataFrame(list_of_tuples, columns = ['Id','Name','Ticker'])  
-     
-# Print data.  
-df  
+# COMMAND ----------
+
+# MAGIC %sql drop table if exists dimDate;
+
+# COMMAND ----------
+
+# MAGIC %fs rm -r /delta/dimDate
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC CREATE table if not exists  dimDate
+# MAGIC (cobdate int,
+# MAGIC date timestamp,
+# MAGIC week_day string,
+# MAGIC day int,
+# MAGIC month int,
+# MAGIC week int,
+# MAGIC quarter int,
+# MAGIC year int)
+# MAGIC USING DELTA
+# MAGIC LOCATION '/delta/dimDate'
+
+# COMMAND ----------
+
+dateDimFinal.write.insertInto('dimDate')
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC 
+# MAGIC SELECT * FROM dimDate limit 10;
 
 # COMMAND ----------
 
@@ -109,6 +117,27 @@ df
 
 # COMMAND ----------
 
+# MAGIC %sql
+# MAGIC CREATE table if not exists  dimDate
+# MAGIC (cobdate int,
+# MAGIC date timestamp,
+# MAGIC week_day string,
+# MAGIC day int,
+# MAGIC month int,
+# MAGIC week int,
+# MAGIC quarter int,
+# MAGIC year int)
+# MAGIC USING DELTA
+# MAGIC LOCATION '/delta/temp'
+# MAGIC 
+# MAGIC dateDimFinal.write.insertInto('dimDate')
+# MAGIC 
+# MAGIC %sql
+# MAGIC 
+# MAGIC SELECT * FROM dimDate;
+
+# COMMAND ----------
+
 # DBTITLE 1,Set Start and End dates for loading data - each month will run a new Notebook job
 tickerName='AAPL'# AAPL GOOGL'
 start_date='2019-01-01'
@@ -127,7 +156,7 @@ print(datelist)
 
 # COMMAND ----------
 
-pool.map(lambda arg: dbutils.notebook.run("/Users/durgadas.g@hcl.com/03 - Yahoo Finance Historic Load",                                          
+pool.map(lambda arg: dbutils.notebook.run("/Shared/03 - Yahoo Finance Historic Load",                                          
                                          timeout_seconds=300,
                                          arguments = {"tickerName": tickerName,"start_date":arg[0], "end_date":arg[1]}), datelist)
 
@@ -139,7 +168,7 @@ dsCompleteData = sqlContext.sql('select * from DailyClose')
 
 # MAGIC %sql
 # MAGIC 
-# MAGIC SELECT count(1) FROM DailyClose;
+# MAGIC SELECT * FROM DailyClose;
 
 # COMMAND ----------
 
